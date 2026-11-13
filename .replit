@@ -1,0 +1,5 @@
+run = "npm install && npm start"
+entrypoint = "index.js"
+[nix]
+channel = "stable-24_05"
+packages = ["nodejs_20"]

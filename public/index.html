@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joker.md bot — Connexion</title>
+<style>
+  :root{
+    --bg:#0a0a0f; --panel:#121218; --red:#e11d2e; --blue:#1d4ed8; --text:#f1f1f3; --muted:#8a8a93;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; background:
+      radial-gradient(circle at 20% 10%, rgba(225,29,46,.18), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(29,78,216,.22), transparent 45%),
+      var(--bg);
+    color:var(--text); font-family:'Segoe UI',system-ui,sans-serif;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .card{
+    width:100%; max-width:420px; background:var(--panel); border:1px solid #23232c;
+    border-radius:16px; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .logo{font-size:26px; font-weight:800; letter-spacing:.5px}
+  .logo span{color:var(--red)}
+  .sub{color:var(--muted); margin:6px 0 22px; font-size:14px}
+  .tabs{display:flex; gap:8px; margin-bottom:18px}
+  .tab{flex:1; text-align:center; padding:10px; border-radius:10px; cursor:pointer;
+       background:#1a1a22; color:var(--muted); font-weight:600; font-size:14px}
+  .tab.active{background:linear-gradient(90deg,var(--red),var(--blue)); color:#fff}
+  input{
+    width:100%; padding:13px 14px; border-radius:10px; border:1px solid #2a2a35;
+    background:#0e0e14; color:var(--text); font-size:15px; margin-bottom:14px;
+  }
+  button{
+    width:100%; padding:13px; border:0; border-radius:10px; font-weight:700; font-size:15px;
+    background:linear-gradient(90deg,var(--red),var(--blue)); color:#fff; cursor:pointer;
+  }
+  button:disabled{opacity:.6; cursor:wait}
+  .result{margin-top:18px; padding:16px; border-radius:10px; background:#0e0e14; border:1px solid #2a2a35; display:none}
+  .code{font-size:28px; font-weight:800; letter-spacing:3px; color:var(--blue); text-align:center; margin:8px 0}
+  .steps{font-size:13px; color:var(--muted); line-height:1.6}
+  .foot{margin-top:20px; font-size:12px; color:var(--muted); text-align:center}
+  a{color:var(--blue); text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Joker<span>.md</span> bot</div>
+    <div class="sub">Konekte WhatsApp ou an 1 minit — oswa itilize Telegram.</div>
+
+    <div class="tabs">
+      <div class="tab active" id="tabWA">WhatsApp .pair</div>
+      <div class="tab" id="tabTG">Telegram</div>
+    </div>
+
+    <div id="paneWA">
+      <input id="numInput" placeholder="Nimewo WhatsApp (egz: 22501234567)">
+      <button id="btnPair">Jenere Kòd Pairage</button>
+      <div class="result" id="result">
+        <div class="code" id="codeVal">----</div>
+        <div class="steps">
+          WhatsApp → Paramèt → Aparèy konekte → Konekte yon aparèy →
+          Konekte ak nimewo telefòn → antre kòd la anwo a.
+        </div>
+      </div>
+    </div>
+
+    <div id="paneTG" style="display:none">
+      <p class="steps">Chèche bot la sou Telegram epi tape <b>/pair &lt;nimewo&gt;</b> pou jwenn menm kòd la, dirèkteman nan chat la.</p>
+      <a href="#" target="_blank">Ouvri bot Telegram →</a>
+    </div>
+
+    <div class="foot">Joker.md bot — chak pairage se prive, pou pwòp nimewo moun nan sèlman.</div>
+  </div>
+
+<script>
+  const tabWA=document.getElementById('tabWA'), tabTG=document.getElementById('tabTG');
+  const paneWA=document.getElementById('paneWA'), paneTG=document.getElementById('paneTG');
+  tabWA.onclick=()=>{tabWA.classList.add('active');tabTG.classList.remove('active');paneWA.style.display='block';paneTG.style.display='none';};
+  tabTG.onclick=()=>{tabTG.classList.add('active');tabWA.classList.remove('active');paneTG.style.display='block';paneWA.style.display='none';};
+
+  const btn=document.getElementById('btnPair');
+  const result=document.getElementById('result');
+  const codeVal=document.getElementById('codeVal');
+
+  btn.onclick=async()=>{
+    const number=document.getElementById('numInput').value.replace(/\D/g,'');
+    if(number.length<8){alert('Mete nimewo a ak kòd peyi a, san +');return;}
+    btn.disabled=true; btn.textContent='Ap jenere...';
+    await fetch('/api/pair',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({number})});
+
+    const poll=setInterval(async()=>{
+      const r=await fetch('/api/status/'+number); const d=await r.json();
+      if(d.code){
+        codeVal.textContent=d.code; result.style.display='block';
+        btn.disabled=false; btn.textContent='Jenere yon lòt kòd';
+        clearInterval(poll);
+      }
+    },2000);
+  };
+</script>
+</body>
+</html>
